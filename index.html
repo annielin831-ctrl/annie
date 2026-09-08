@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>個人作品集 Portfolio | 大學四年專題成果展</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- FontAwesome 圖示庫 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- 導覽列 -->
+    <nav class="navbar">
+        <div class="logo">PORTFOLIO<span>.</span></div>
+        <ul class="nav-links">
+            <li><a href="#about">關於我</a></li>
+            <li><a href="#skills">核心技能</a></li>
+            <li><a href="#projects">歷年專題</a></li>
+            <li><a href="#contact">聯絡方式</a></li>
+        </ul>
+    </nav>
+
+    <!-- 主頁/ Hero 區塊 -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>你好，我是 <span>[您的名字]</span></h1>
+            <p class="subtitle">大學四年實作成果 & 個人 IP 展演空間</p>
+            <p class="bio">熱衷於結合語意傳達、數位媒體與程式開發。這裡記錄了我從大一到大四的跨領域專題與專案累積。</p>
+            <a href="#projects" class="btn">瀏覽專題成果</a>
+        </div>
+    </section>
+
+    <!-- 關於我區塊 -->
+    <section id="about" class="section">
+        <h2 class="section-title">關於我 <span>About Me</span></h2>
+        <div class="about-container">
+            <div class="about-text">
+                <p>歡迎來到我的個人網站！在大學四年中，我專注於將理論知識轉化為實際成果。無論是跨文化傳播、數位內容創作，或是前端網頁應用開發，我都致力於透過專案解決真實問題。</p>
+                <div class="stats">
+                    <div class="stat-item">
+                        <h3>4+</h3>
+                        <p>專題成果</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3>10+</h3>
+                        <p>完成專案</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3>100%</h3>
+                        <p>熱情與投入</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 技能區塊 -->
+    <section id="skills" class="section bg-light">
+        <h2 class="section-title">核心技能 <span>Skills</span></h2>
+        <div class="skills-grid">
+            <div class="skill-card">
+                <i class="fa-solid fa-code"></i>
+                <h3>網頁前端開發</h3>
+                <p>HTML5, CSS3, JavaScript, Responsive Design (RWD)</p>
+            </div>
+            <div class="skill-card">
+                <i class="fa-solid fa-comments"></i>
+                <h3>跨文化與語言溝通</h3>
+                <p>臺灣傳播實務、日語應用、跨文化內容設計</p>
+            </div>
+            <div class="skill-card">
+                <i class="fa-solid fa-bullhorn"></i>
+                <h3>數位內容與行銷</h3>
+                <p>社群文案企劃、品牌IP定位、影音/多媒體呈現</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 專題成果區塊 -->
+    <section id="projects" class="section">
+        <h2 class="section-title">歷年專題成果 <span>Projects</span></h2>
+        
+        <!-- 分類篩選按鈕 -->
+        <div class="filter-buttons">
+            <button class="filter-btn active" data-filter="all">全部作品</button>
+            <button class="filter-btn" data-filter="graduation">畢業專題</button>
+            <button class="filter-btn" data-filter="web">網頁與數位</button>
+            <button class="filter-btn" data-filter="media">媒體與企劃</button>
+        </div>
+
+        <div class="projects-grid">
+            <!-- 專題卡片 1 -->
+            <div class="project-card" data-category="graduation">
+                <div class="project-img">
+                    <div class="placeholder-img">畢業專題封面</div>
+                </div>
+                <div class="project-info">
+                    <span class="tag">大四畢業專題</span>
+                    <h3>專題名稱：數位傳播與文化再現企劃</h3>
+                    <p>針對在地文化與數位媒體結合的整合性專案，負責整體架構規劃與網站/視覺呈現。</p>
+                    <div class="tech-stack">
+                        <span>HTML/CSS</span>
+                        <span>專案企劃</span>
+                        <span>影音剪輯</span>
+                    </div>
+                    <a href="#" class="project-link" target="_blank">查看詳情 <i class="fa-solid fa-arrow-right"></i></a>
+                </div>
+            </div>
+
+            <!-- 專題卡片 2 -->
+            <div class="project-card" data-category="web">
+                <div class="project-img">
+                    <div class="placeholder-img">專案 2 封面</div>
+                </div>
+                <div class="project-info">
+                    <span class="tag">大三網頁專案</span>
+                    <h3>互動式語言學習與文化介紹網站</h3>
+                    <p>設計專屬雙語學習者的互動介面，提升使用者在網頁上的參與度與體驗。</p>
+                    <div class="tech-stack">
+                        <span>JavaScript</span>
+                        <span>CSS Flexbox</span>
+                        <span>UI/UX</span>
+                    </div>
+                    <a href="#" class="project-link" target="_blank">查看詳情 <i class="fa-solid fa-arrow-right"></i></a>
+                </div>
+            </div>
+
+            <!-- 專題卡片 3 -->
+            <div class="project-card" data-category="media">
+                <div class="project-img">
+                    <div class="placeholder-img">專案 3 封面</div>
+                </div>
+                <div class="project-info">
+                    <span class="tag">大二媒體專題</span>
+                    <h3>永續環境與在地故事採訪報導</h3>
+                    <p>深度採訪與多媒體敘事專案，結合數位刊物與動態視覺呈現。</p>
+                    <div class="tech-stack">
+                        <span>訪談企劃</span>
+                        <span>文案撰寫</span>
+                        <span>排版設計</span>
+                    </div>
+                    <a href="#" class="project-link" target="_blank">查看詳情 <i class="fa-solid fa-arrow-right"></i></a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 頁尾 / 聯絡方式 -->
+    <footer id="contact">
+        <div class="footer-content">
+            <h2>聯絡我 <span>Contact</span></h2>
+            <p>如果您對我的作品感興趣，歡迎隨時透過以下方式與我聯繫！</p>
+            <div class="social-links">
+                <a href="mailto:your-email@example.com" title="Email"><i class="fa-solid fa-envelope"></i></a>
+                <a href="https://github.com/your-username" target="_blank" title="GitHub"><i class="fa-brands fa-github"></i></a>
+                <a href="https://linkedin.com" target="_blank" title="LinkedIn"><i class="fa-brands fa-linkedin"></i></a>
+            </div>
+            <p class="copyright">&copy; 2026 [您的名字]. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

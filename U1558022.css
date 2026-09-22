@@ -1,0 +1,110 @@
+/* ==========================================
+   全局重置與主題顏色
+   ========================================== */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: "Microsoft JhengHei", Arial, sans-serif;
+    background-color: #fff8f0; /* 溫馨暖色調背景 */
+    color: #5c4033;
+    line-height: 1.6;
+}
+
+/* ==========================================
+   頁首 Header 樣式
+   ========================================== */
+header {
+    background-color: #e8a87c;
+    color: #ffffff;
+    text-align: center;
+    padding: 40px 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+header h1 {
+    font-size: 2.2rem;
+    margin-bottom: 8px;
+}
+
+header p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+/* ==========================================
+   圖片畫廊 Grid 排版
+   ========================================== */
+.gallery-container {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 0 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 25px;
+}
+
+/* 圖片卡片容器 */
+.gallery-card {
+    position: relative;
+    display: block;
+    background-color: #ffffff;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    text-decoration: none;
+    aspect-ratio: 1 / 1; /* 保持方形比例 */
+}
+
+/* 圖片本體設定 */
+.gallery-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* 確保整張圖片都能完整顯示不被切割 */
+    padding: 15px;
+    display: block;
+    background-color: #ffffff;
+}
+
+/* 滑鼠懸停效果 */
+.gallery-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* 滑鼠懸停時顯示的遮罩層 */
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(232, 168, 124, 0.85);
+    color: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.gallery-card:hover .overlay {
+    opacity: 1;
+}
+
+/* ==========================================
+   頁尾 Footer 樣式
+   ========================================== */
+footer {
+    text-align: center;
+    padding: 25px 20px;
+    color: #a08575;
+    font-size: 0.9rem;
+    margin-top: 40px;
+}

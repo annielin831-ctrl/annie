@@ -1,0 +1,251 @@
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>御茗閣 | 頂級嚴選茶葉 · 品味沉穩人生</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- 引入 Google 字體以增加質感 -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- 頂部導覽列 -->
+    <header class="site-header">
+        <div class="container header-container">
+            <div class="logo">
+                <h1>御茗閣</h1>
+                <span>ROYAL TEA PAVILION</span>
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="#about">品牌初衷</a></li>
+                    <li><a href="#products">嚴選茶品</a></li>
+                    <li><a href="#art">品茶之道</a></li>
+                    <li><a href="#contact">聯絡我們</a></li>
+                </ul>
+            </nav>
+            <div class="header-actions">
+                <a href="#cart" class="cart-btn">🛒 購物車 (<span id="cart-count">0</span>)</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主視覺 Banner -->
+    <section class="hero-section">
+        <div class="hero-content">
+            <h2>一盞好茶，沉澱浮華</h2>
+            <p>尋訪臺灣與世界頂級茶園，為成熟內斂的您，保留最純粹的甘醇與底蘊。</p>
+            <a href="#products" class="btn-primary">探索嚴選茶品</a>
+        </div>
+    </section>
+
+    <!-- 品牌理念 -->
+    <section id="about" class="about-section container">
+        <div class="section-title">
+            <h3>品味，源自堅持</h3>
+            <div class="divider"></div>
+        </div>
+        <p class="about-text">
+            茶，不只是飲品，更是歲月沈澱後的對話。御茗閣專為重視生活品味的成年人而設，嚴格把關每一道烘焙與採摘工序。我們相信，一杯好茶能撫平繁雜思緒，在靜謐中找回內心的安定與力量。
+        </p>
+    </section>
+
+    <!-- 產品展示區 (10款茶葉) -->
+    <section id="products" class="products-section container">
+        <div class="section-title">
+            <h3>典藏茶品</h3>
+            <div class="divider"></div>
+            <p>十款職人手作經典，滿足您對極致茶香的追求</p>
+        </div>
+
+        <div class="product-grid">
+            
+            <!-- 01 -->
+            <div class="product-card">
+                <div class="product-img">
+                    <img src="images/01.jpg" alt="高山烏龍茶">
+                </div>
+                <div class="product-info">
+                    <span class="category">烏龍茶系列</span>
+                    <h4>01. 高山烏龍茶</h4>
+                    <p class="desc">海拔千米以上雲霧孕育，茶湯金黃透亮，入口清香回甘，帶有高山冷韻。</p>
+                    <div class="price-row">
+                        <span class="price">NT$ 1,280</span>
+                        <button class="btn-buy" onclick="addToCart('高山烏龍茶')">加入購物車</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 02 -->
+            <div class="product-card">
+                <div class="product-img">
+                    <img src="images/02.jpg" alt="鐵觀音">
+                </div>
+                <div class="product-info">
+                    <span class="category">重焙茶系列</span>
+                    <h4>02. 鐵觀音</h4>
+                    <p class="desc">傳統重焙火工藝，茶韻深厚沉穩，帶有獨特的果香與熟韻，耐泡不澀。</p>
+                    <div class="price-row">
+                        <span class="price">NT$ 1,450</span>
+                        <button class="btn-buy" onclick="addToCart('鐵觀音')">加入購物車</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 03 -->
+            <div class="product-card">
+                <div class="product-img">
+                    <img src="images/03.jpg" alt="櫻花綠茶">
+                </div>
+                <div class="product-info">
+                    <span class="category">花香綠茶系列</span>
+                    <h4>03. 櫻花綠茶</h4>
+                    <p class="desc">嚴選細緻綠茶揉合春日櫻花香氣，清雅爽口，帶有微甜的花香尾韻。</p>
+                    <div class="price-row">
+                        <span class="price">NT$ 980</span>
+                        <button class="btn-buy" onclick="addToCart('櫻花綠茶')">加入購物車</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 04 -->
+            <div class="product-card">
+                <div class="product-img">
+                    <img src="images/04.jpg" alt="紅玉紅茶">
+                </div>
+                <div class="product-info">
+                    <span class="category">臺灣紅茶系列</span>
+                    <h4>04. 紅玉紅茶 (台茶18號)</h4>
+                    <p class="desc">具備天然的肉桂香與淡淡薄荷尾韻，茶湯紅豔明亮，口感層次豐富飽滿。</p>
+                    <div class="price-row">
+                        <span class="price">NT$ 1,350</span>
+                        <button class="btn-buy" onclick="addToCart('紅玉紅茶')">加入購物車</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 05 -->
+            <div class="product-card">
+                <div class="product-img">
+                    <img src="images/05.jpg" alt="茉莉花茶">
+                </div>
+                <div class="product-info">
+                    <span class="category">花茶系列</span>
+                    <h4>05. 茉莉花茶</h4>
+                    <p class="desc">以鮮嫩綠茶佐新鮮茉莉花辦反覆窨製，花香撲鼻，茶味溫潤清甜。</p>
+                    <div class="price-row">
+                        <span class="price">NT$ 880</span>
+                        <button class="btn-buy" onclick="addToCart('茉莉花茶')">加入購物車</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 06 -->
+            <div class="product-card">
+                <div class="product-img">
+                    <img src="images/06.jpg" alt="普洱茶">
+                </div>
+                <div class="product-info">
+                    <span class="category">陳年普洱系列</span>
+                    <h4>06. 普洱茶 (熟茶)</h4>
+                    <p class="desc">經歲月陳化，質地溫潤厚實，茶湯紅濃透亮，適合靜心細品的沉穩之選。</p>
+                    <div class="price-row">
+                        <span class="price">NT$ 1,800</span>
+                        <button class="btn-buy" onclick="addToCart('普洱茶')">加入購物車</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 07 -->
+            <div class="product-card">
+                <div class="product-img">
+                    <img src="images/07.jpg" alt="白毫銀針">
+                </div>
+                <div class="product-info">
+                    <span class="category">白茶系列</span>
+                    <h4>07. 白毫銀針</h4>
+                    <p class="desc">滿披白毫，芽頭肥壯。茶湯清淡毫香顯現，口感清鮮爽口，極具珍稀感。</p>
+                    <div class="price-row">
+                        <span class="price">NT$ 2,200</span>
+                        <button class="btn-buy" onclick="addToCart('白毫銀針')">加入購物車</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 08 -->
+            <div class="product-card">
+                <div class="product-img">
+                    <img src="images/08.jpg" alt="柚香金萱">
+                </div>
+                <div class="product-info">
+                    <span class="category">特色風味系列</span>
+                    <h4>08. 柚香金萱</h4>
+                    <p class="desc">金萱茶特有的奶香交織清雅柚子果香，口感溫順滑潤，層次別致獨特。</p>
+                    <div class="price-row">
+                        <span class="price">NT$ 1,150</span>
+                        <button class="btn-buy" onclick="addToCart('柚香金萱')">加入購物車</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 09 -->
+            <div class="product-card">
+                <div class="product-img">
+                    <img src="images/09.jpg" alt="東方美人">
+                </div>
+                <div class="product-info">
+                    <span class="category">特級烏龍系列</span>
+                    <h4>09. 東方美人</h4>
+                    <p class="desc">經小綠葉蟬親吻叮咬，散發獨特天然熟果香與蜜香，琥珀色茶湯甘甜溫醇。</p>
+                    <div class="price-row">
+                        <span class="price">NT$ 2,500</span>
+                        <button class="btn-buy" onclick="addToCart('東方美人')">加入購物車</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 10 -->
+            <div class="product-card">
+                <div class="product-img">
+                    <img src="images/10.jpg" alt="花草茶">
+                </div>
+                <div class="product-info">
+                    <span class="category">草本舒心系列</span>
+                    <h4>10. 花草茶</h4>
+                    <p class="desc">無咖啡因草本配方，融合多種天然草本植栽，夜晚沉澱身心的最佳良伴。</p>
+                    <div class="price-row">
+                        <span class="price">NT$ 950</span>
+                        <button class="btn-buy" onclick="addToCart('花草茶')">加入購物車</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- 頁尾 -->
+    <footer id="contact" class="site-footer">
+        <div class="container footer-content">
+            <div class="footer-info">
+                <h4>御茗閣 ROYAL TEA</h4>
+                <p>地址：苗栗縣茶山路頂級茗園 88 號</p>
+                <p>電話：(037) 888-9999</p>
+                <p>信箱：service@royaltea.com.tw</p>
+            </div>
+            <div class="footer-copyright">
+                <p>&copy; 2026 御茗閣 版權所有. 沉穩品味，源遠流長。</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 簡單互動 Script -->
+    <script>
+        let cartCount = 0;
+        function addToCart(productName) {
+            cartCount++;
+            document.getElementById('cart-count').innerText = cartCount;
+            alert(`已成功將「${productName}」加入購物車。`);
+        }
+    </script>
+</body>
+</html>

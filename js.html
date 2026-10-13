@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AURA // 頂級美學購物商城</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#fdf4f5',
+                            100: '#fbe8eb',
+                            500: '#e11d48',
+                            600: '#be123c',
+                            900: '#881337',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            overflow-x: hidden;
+        }
+
+        /* Custom Ripple Effect */
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            transform: scale(0);
+            animation: ripple-effect 0.6s cubic-bezier(0, 0.2, 0.8, 1) forwards;
+            background: rgba(255, 255, 255, 0.6);
+            pointer-events: none;
+        }
+
+        @keyframes ripple-effect {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        /* Button Shake Animation */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-4px); }
+            40%, 80% { transform: translateX(4px); }
+        }
+        .btn-shake {
+            animation: shake 0.4s ease-in-out;
+        }
+
+        /* Cart Icon Bounce */
+        @keyframes cartBounce {
+            0% { transform: scale(1); }
+            30% { transform: scale(1.3) rotate(-10deg); }
+            50% { transform: scale(0.9) rotate(10deg); }
+            70% { transform: scale(1.15) rotate(-5deg); }
+            100% { transform: scale(1); }
+        }
+        .cart-bounce {
+            animation: cartBounce 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* Floating Badge Animation (+1 / ❤️) */
+        @keyframes floatUp {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(0.8) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-40px) scale(1.2) rotate(10deg);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-80px) scale(1) rotate(-10deg);
+            }
+        }
+        .floating-badge {
+            position: absolute;
+            pointer-events: none;
+            animation: floatUp 0.9s ease-out forwards;
+            font-weight: 800;
+            z-index: 99;
+        }
+
+        /* Flying Thumbnail to Cart Animation */
+        .flying-thumb {
+            position: fixed;
+            z-index: 9999;
+            object-fit: cover;
+            border-radius: 9999px;
+            box-shadow: 0 10px 25px -5px rgba(225, 29, 72, 0.5);
+            pointer-events: none;
+            transition: all 0.8s cubic-bezier(0.2, 1, 0.3, 1);
+        }
+
+        /* Toast Slide In */
+        @keyframes toastSlide {
+            0% { transform: translateX(120%) scale(0.9); opacity: 0; }
+            100% { transform: translateX(0) scale(1); opacity: 1; }
+        }
+        @keyframes toastOut {
+            0% { transform: translateX(0) scale(1); opacity: 1; }
+            100% { transform: translateX(120%) scale(0.9); opacity: 0; }
+        }
+        .toast-in {
+            animation: toastSlide 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        .toast-out {
+            animation: toastOut 0.4s ease-in forwards;
+        }
+
+        /* Glassmorphism */
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col selection:bg-rose-500 selection:text-white">
+
+    <!-- Navbar -->
+    <header class="sticky top-0 z-40 glass-panel border-b border-slate-800/80 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-rose-600 to-pink-500 flex items-center justify-center shadow-lg shadow-rose-600/30">
+                    <i class="fa-solid fa-bolt-lightning text-white text-lg"></i>
+                </div>
+                <span class="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
+                    AURA<span class="text-rose-500">.</span>
+                </span>
+            </div>
+
+            <div class="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-400">
+                <a href="#" class="text-slate-100 hover:text-rose-400 transition-colors">精選系列</a>
+                <a href="#" class="hover:text-rose-400 transition-colors">限量新品</a>
+                <a href="#" class="hover:text-rose-400 transition-colors">科技潮品</a>
+                <a href="#" class="hover:text-rose-400 transition-colors">美學生活</a>
+            </div>
+
+            <div class="flex items-center space-x-4">
+                <!-- Cart Button -->
+                <button id="cart-btn" class="relative group p-3 rounded-2xl bg-slate-900 border border-slate-800 hover:border-rose-500/50 transition-all duration-300 shadow-lg flex items-center space-x-2">
+                    <i id="cart-icon" class="fa-solid fa-bag-shopping text-slate-200 group-hover:text-rose-400 text-lg transition-colors"></i>
+                    <span class="text-xs font-bold text-slate-300 group-hover:text-white hidden sm:inline">購物車</span>
+                    <span id="cart-counter" class="absolute -top-2 -right-2 bg-rose-600 text-white text-[11px] font-extrabold w-6 h-6 rounded-full flex items-center justify-center shadow-md shadow-rose-600/50 ring-4 ring-slate-950 scale-100 transition-transform duration-300">0</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Banner -->
+    <section class="relative overflow-hidden py-16 lg:py-24 border-b border-slate-900">
+        <div class="absolute inset-0 opacity-20 pointer-events-none">
+            <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-rose-600 rounded-full filter blur-[120px]"></div>
+            <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-indigo-600 rounded-full filter blur-[120px]"></div>
+        </div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+            <div class="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-semibold mb-6">
+                <span class="flex h-2 w-2 rounded-full bg-rose-500 animate-pulse"></span>
+                <span>全館體驗華麗購物特效</span>
+            </div>
+            <h1 class="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-white mb-6">
+                極致工藝 <span class="bg-gradient-to-r from-rose-500 via-pink-500 to-indigo-400 bg-clip-text text-transparent">絢麗美學</span>
+            </h1>
+            <p class="max-w-2xl mx-auto text-base sm:text-lg text-slate-400 mb-10">
+                探索為次世代打造的精緻商品，點擊下方「加入購物車」享受全螢幕彩帶、粒子爆炸與極速軌跡飛行的視覺饗宴！
+            </p>
+        </div>
+    </section>
+
+    <!-- Product Catalog -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 w-full">
+        <div class="flex items-center justify-between mb-8">
+            <h2 class="text-2xl font-bold text-white flex items-center space-x-3">
+                <i class="fa-solid fa-fire text-rose-500"></i>
+                <span>熱銷精選商品</span>
+            </h2>
+            <span class="text-sm text-slate-400 font-medium">顯示全部 6 件商品</span>
+        </div>
+
+        <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Products will be injected via JS -->
+        </div>
+    </main>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col space-y-4 pointer-events-none"></div>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-900 bg-slate-950/80 mt-20 py-12 text-center text-sm text-slate-500">
+        <div class="max-w-7xl mx-auto px-4">
+            <p>&copy; 2026 AURA Commerce. Crafted with pure HTML, Tailwind CSS & JavaScript.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Product Catalog Data
+        const products = [
+            {
+                id: 1,
+                name: "AURA Apex 降噪無線耳機",
+                category: "科技潮品",
+                price: 7990,
+                rating: 4.9,
+                reviews: 128,
+                image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80",
+                badge: "熱銷冠軍"
+            },
+            {
+                id: 2,
+                name: "Chronos 極簡鈦金智慧手錶",
+                category: "穿戴美學",
+                price: 12500,
+                rating: 4.8,
+                reviews: 94,
+                image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=600&q=80",
+                badge: "新品上市"
+            },
+            {
+                id: 3,
+                name: "Nova 頂級手沖咖啡隨行組",
+                category: "生活美學",
+                price: 3200,
+                rating: 4.7,
+                reviews: 215,
+                image: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=600&q=80",
+                badge: "限時特惠"
+            },
+            {
+                id: 4,
+                name: "Lumina 智慧環境光RGB檯燈",
+                category: "居家設計",
+                price: 4500,
+                rating: 4.9,
+                reviews: 67,
+                image: "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=600&q=80",
+                badge: "人氣推薦"
+            },
+            {
+                id: 5,
+                name: "Zenith 極輕量碳纖維背包",
+                category: "時尚配件",
+                price: 5800,
+                rating: 4.6,
+                reviews: 82,
+                image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=600&q=80",
+                badge: "限量發售"
+            },
+            {
+                id: 6,
+                name: "Pulse 沉浸式藍牙立體音響",
+                category: "科技潮品",
+                price: 8900,
+                rating: 5.0,
+                reviews: 156,
+                image: "https://images.unsplash.com/photo-1545454675-3531b543be5d?auto=format&fit=crop&w=600&q=80",
+                badge: "編輯精選"
+            }
+        ];
+
+        let cartCount = 0;
+
+        // Render Products
+        function renderProducts() {
+            const grid = document.getElementById('product-grid');
+            grid.innerHTML = products.map(p => `
+                <div class="glass-panel rounded-3xl overflow-hidden group hover:border-rose-500/40 transition-all duration-500 flex flex-col shadow-xl">
+                    <div class="relative overflow-hidden aspect-square bg-slate-900">
+                        <img src="${p.image}" alt="${p.name}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" onerror="this.src='https://placehold.co/600x600/1e293b/ffffff?text=AURA'">
+                        <div class="absolute top-4 left-4">
+                            <span class="px-3 py-1 rounded-full text-xs font-bold bg-slate-900/80 backdrop-blur-md text-rose-400 border border-rose-500/30">
+                                ${p.badge}
+                            </span>
+                        </div>
+                        <div class="absolute top-4 right-4">
+                            <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-900/80 backdrop-blur-md text-slate-300 flex items-center space-x-1">
+                                <i class="fa-solid fa-star text-amber-400 text-[10px]"></i>
+                                <span>${p.rating}</span>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="p-6 flex flex-col flex-grow justify-between">
+                        <div>
+                            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">${p.category}</span>
+                            <h3 class="text-lg font-bold text-white mt-1 mb-2 group-hover:text-rose-400 transition-colors">${p.name}</h3>
+                        </div>
+                        <div class="flex items-center justify-between mt-4">
+                            <span class="text-2xl font-black text-white">NT$ ${p.price.toLocaleString()}</span>
+                            <button onclick="addToCart(event, ${p.id})" class="add-to-cart-btn relative overflow-hidden group/btn px-5 py-3 rounded-2xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-sm shadow-lg shadow-rose-600/30 transition-all duration-300 active:scale-95 flex items-center space-x-2">
+                                <i class="fa-solid fa-cart-plus transition-transform group-hover/btn:scale-110"></i>
+                                <span>加入購物車</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Add to Cart Master Effect Function
+        function addToCart(event, productId) {
+            const product = products.find(p => p.id === productId);
+            const button = event.currentTarget;
+            const card = button.closest('.glass-panel');
+            const imgElement = card.querySelector('img');
+
+            // 1. Button Ripple Effect
+            createRipple(event, button);
+
+            // 2. Button Particle Explosion
+            createParticleExplosion(button);
+
+            // 3. Button Shake Effect
+            button.classList.add('btn-shake');
+            setTimeout(() => button.classList.remove('btn-shake'), 400);
+
+            // 4. Floating Badge (+1 and ❤️)
+            createFloatingBadges(button);
+
+            // 5. Flying Thumbnail to Cart Animation
+            createFlyingThumbnail(imgElement);
+
+            // 6. Cart Icon Animation & Counter Increment
+            updateCartCounter();
+
+            // 7. Fullscreen Confetti Celebration
+            triggerConfetti();
+
+            // 8. Toast Notification
+            showToast(product);
+        }
+
+        // 1. Ripple Effect Creator
+        function createRipple(event, button) {
+            const rect = button.getBoundingClientRect();
+            const ripple = document.createElement('span');
+            const size = Math.max(rect.width, rect.height);
+            ripple.style.width = ripple.style.height = `${size}px`;
+            ripple.style.left = `${event.clientX - rect.left - size / 2}px`;
+            ripple.style.top = `${event.clientY - rect.top - size / 2}px`;
+            ripple.className = 'ripple';
+            button.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 600);
+        }
+
+        // 2. Button Particle Explosion
+        function createParticleExplosion(button) {
+            const rect = button.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            const particleCount = 18;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'absolute rounded-full pointer-events-none z-50';
+                
+                const size = Math.random() * 8 + 4;
+                const colors = ['#e11d48', '#f43f5e', '#fb7185', '#fda4af', '#ffffff', '#ec4899'];
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.left = `${centerX}px`;
+                particle.style.top = `${centerY}px`;
+
+                document.body.appendChild(particle);
+
+                const angle = Math.random() * Math.PI * 2;
+                const velocity = Math.random() * 120 + 50;
+                const destinationX = Math.cos(angle) * velocity;
+                const destinationY = Math.sin(angle) * velocity;
+
+                particle.animate([
+                    { transform: 'translate(0, 0) scale(1)', opacity: 1 },
+                    { transform: `translate(${destinationX}px, ${destinationY}px) scale(0)`, opacity: 0 }
+                ], {
+                    duration: 600 + Math.random() * 400,
+                    easing: 'cubic-bezier(0, .9, .57, 1)'
+                }).onfinish = () => particle.remove();
+            }
+        }
+
+        // 4. Floating Badges (+1 and ❤️)
+        function createFloatingBadges(button) {
+            const rect = button.getBoundingClientRect();
+            const symbols = ['+1', '❤️', '✨', '+1'];
+            
+            for (let i = 0; i < 2; i++) {
+                const badge = document.createElement('div');
+                badge.className = 'floating-badge text-rose-500 text-base drop-shadow-lg';
+                badge.innerText = symbols[Math.floor(Math.random() * symbols.length)];
+                badge.style.left = `${rect.left + rect.width / 2 + (Math.random() * 40 - 20)}px`;
+                badge.style.top = `${rect.top}px`;
+                document.body.appendChild(badge);
+                setTimeout(() => badge.remove(), 900);
+            }
+        }
+
+        // 5. Flying Thumbnail Parabolic Animation
+        function createFlyingThumbnail(imgElement) {
+            const imgRect = imgElement.getBoundingClientRect();
+            const cartBtn = document.getElementById('cart-btn');
+            const cartRect = cartBtn.getBoundingClientRect();
+
+            const flyer = document.createElement('img');
+            flyer.src = imgElement.src;
+            flyer.className = 'flying-thumb';
+            flyer.style.width = `${imgRect.width}px`;
+            flyer.style.height = `${imgRect.height}px`;
+            flyer.style.left = `${imgRect.left}px`;
+            flyer.style.top = `${imgRect.top}px`;
+
+            document.body.appendChild(flyer);
+
+            // Force reflow
+            flyer.getBoundingClientRect();
+
+            setTimeout(() => {
+                flyer.style.left = `${cartRect.left + cartRect.width / 2 - 20}px`;
+                flyer.style.top = `${cartRect.top + cartRect.height / 2 - 20}px`;
+                flyer.style.width = '40px';
+                flyer.style.height = '40px';
+                flyer.style.opacity = '0.3';
+                flyer.style.transform = 'scale(0.2) rotate(360deg)';
+            }, 20);
+
+            setTimeout(() => flyer.remove(), 800);
+        }
+
+        // 6. Cart Counter & Icon Bounce
+        function updateCartCounter() {
+            cartCount++;
+            const counter = document.getElementById('cart-counter');
+            const cartIcon = document.getElementById('cart-btn');
+            
+            counter.innerText = cartCount;
+            counter.classList.add('scale-125');
+            setTimeout(() => counter.classList.remove('scale-125'), 300);
+
+            cartIcon.classList.add('cart-bounce');
+            setTimeout(() => cartIcon.classList.remove('cart-bounce'), 500);
+        }
+
+        // 7. Fullscreen Confetti Celebration
+        function triggerConfetti() {
+            const confettiCount = 50;
+            const colors = ['#e11d48', '#f43f5e', '#fb7185', '#6366f1', '#38bdf8', '#fbbf24', '#34d399'];
+
+            for (let i = 0; i < confettiCount; i++) {
+                const conf = document.createElement('div');
+                conf.className = 'fixed pointer-events-none z-50 rounded-sm';
+                
+                const size = Math.random() * 10 + 6;
+                conf.style.width = `${size}px`;
+                conf.style.height = `${size * 0.6}px`;
+                conf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                
+                const startX = window.innerWidth / 2 + (Math.random() * 200 - 100);
+                const startY = window.innerHeight / 3;
+                conf.style.left = `${startX}px`;
+                conf.style.top = `${startY}px`;
+
+                document.body.appendChild(conf);
+
+                const destinationX = startX + (Math.random() * 600 - 300);
+                const destinationY = startY + window.innerHeight * 0.6 + Math.random() * 200;
+                const rotation = Math.random() * 720 - 360;
+
+                conf.animate([
+                    { transform: 'translate(0, 0) rotate(0deg)', opacity: 1 },
+                    { transform: `translate(${destinationX - startX}px, ${destinationY - startY}px) rotate(${rotation}deg)`, opacity: 0 }
+                ], {
+                    duration: 1000 + Math.random() * 1000,
+                    easing: 'cubic-bezier(0.25, 1, 0.5, 1)'
+                }).onfinish = () => conf.remove();
+            }
+        }
+
+        // 8. Toast Notification
+        function showToast(product) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast-in glass-panel px-5 py-4 rounded-2xl shadow-2xl flex items-center space-x-4 border border-rose-500/30 max-w-sm pointer-events-auto';
+            
+            toast.innerHTML = `
+                <div class="w-12 h-12 rounded-xl overflow-hidden bg-slate-900 flex-shrink-0 border border-slate-800">
+                    <img src="${product.image}" alt="${product.name}" class="w-full h-full object-cover">
+                </div>
+                <div class="flex-grow">
+                    <div class="flex items-center space-x-1 text-rose-400 text-xs font-bold">
+                        <i class="fa-solid fa-circle-check"></i>
+                        <span>已成功加入購物車</span>
+                    </div>
+                    <h4 class="text-sm font-bold text-white truncate max-w-[200px] mt-0.5">${product.name}</h4>
+                    <span class="text-xs text-slate-400 font-semibold">NT$ ${product.price.toLocaleString()}</span>
+                </div>
+            `;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.remove('toast-in');
+                toast.classList.add('toast-out');
+                setTimeout(() => toast.remove(), 400);
+            }, 3000);
+        }
+
+        // Initialize on load
+        window.onload = function() {
+            renderProducts();
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,797 @@
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>3D 虛擬故宮南院 - 精緻奇幻版</title>
+    <!-- Tailwind CSS for modern UI styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Three.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #050b14;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        #canvas-container {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        /* Mobile On-Screen Joystick / Controls */
+        .touch-controls {
+            display: none;
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            z-index: 20;
+            width: 130px;
+            height: 130px;
+            background: rgba(255, 255, 255, 0.12);
+            border: 2px solid rgba(255, 255, 255, 0.25);
+            border-radius: 50%;
+            touch-action: none;
+            backdrop-filter: blur(4px);
+        }
+        .touch-thumb {
+            position: absolute;
+            top: 40px;
+            left: 40px;
+            width: 50px;
+            height: 50px;
+            background: rgba(245, 158, 11, 0.85);
+            border-radius: 50%;
+            pointer-events: none;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.5);
+        }
+        .action-btns {
+            display: none;
+            position: absolute;
+            bottom: 40px;
+            right: 30px;
+            z-index: 20;
+            gap: 15px;
+        }
+        .action-btn {
+            width: 65px;
+            height: 65px;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            box-shadow: 0 6px 20px rgba(217, 119, 6, 0.5);
+            border: 2px solid rgba(255,255,255,0.8);
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        .action-btn:active {
+            transform: scale(0.92);
+        }
+        @media (pointer: coarse) {
+            .touch-controls, .action-btns {
+                display: flex;
+            }
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="relative">
+
+    <!-- 3D Canvas Container -->
+    <div id="canvas-container"></div>
+
+    <!-- UI Overlay: Top Navigation Bar -->
+    <div class="absolute top-4 left-4 right-4 flex justify-between items-center z-10 pointer-events-auto">
+        <div class="bg-slate-900/85 backdrop-blur-md text-white px-5 py-3 rounded-2xl shadow-2xl border border-amber-500/30 flex items-center gap-3">
+            <span class="text-2xl animate-pulse">🏛️</span>
+            <div>
+                <h1 class="font-bold text-sm sm:text-base tracking-wide bg-gradient-to-r from-amber-300 via-orange-400 to-amber-200 bg-clip-text text-transparent">3D 虛擬故宮南院（精緻奇幻版）</h1>
+                <p class="text-xs text-slate-300" id="current-island-status">目前位置：大廳主島</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2 sm:gap-3">
+            <button onclick="openShopModal()" class="bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white font-semibold px-4 py-2.5 rounded-xl shadow-lg border border-amber-400/40 flex items-center gap-2 text-sm transition transform active:scale-95">
+                <span>🛒</span> <span class="hidden sm:inline">文創商店</span>
+            </button>
+            <button onclick="openMemberModal()" id="member-btn" class="bg-slate-800/90 hover:bg-slate-700 text-amber-300 font-semibold px-4 py-2.5 rounded-xl shadow-lg border border-slate-600 flex items-center gap-2 text-sm transition">
+                <span>👤</span> <span id="member-btn-text">登入 / 註冊</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- UI Overlay: Island Quick Teleport Dock -->
+    <div class="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 hidden md:flex bg-slate-900/90 backdrop-blur-md px-5 py-3 rounded-2xl border border-amber-500/20 gap-3 shadow-2xl">
+        <button onclick="teleportToIsland(0)" class="px-3.5 py-1.5 text-xs font-semibold rounded-xl bg-slate-800 text-amber-300 hover:bg-amber-600 hover:text-white transition border border-slate-700">🏛️ 大廳主島</button>
+        <button onclick="teleportToIsland(1)" class="px-3.5 py-1.5 text-xs font-semibold rounded-xl bg-slate-800 text-emerald-300 hover:bg-emerald-600 hover:text-white transition border border-slate-700">🥬 翠玉白菜島</button>
+        <button onclick="teleportToIsland(2)" class="px-3.5 py-1.5 text-xs font-semibold rounded-xl bg-slate-800 text-cyan-300 hover:bg-cyan-600 hover:text-white transition border border-slate-700">🍵 亞洲茶文化島</button>
+        <button onclick="teleportToIsland(3)" class="px-3.5 py-1.5 text-xs font-semibold rounded-xl bg-slate-800 text-rose-300 hover:bg-rose-600 hover:text-white transition border border-slate-700">🧶 原住民藝術島</button>
+    </div>
+
+    <!-- PC Controls Helper hint -->
+    <div class="absolute top-20 left-4 z-10 hidden lg:block bg-slate-900/70 backdrop-blur-sm text-slate-300 text-xs px-4 py-2.5 rounded-xl border border-slate-700/50 shadow-lg">
+        ⌨️ 控制方式：使用 <b>WASD</b> 或 <b>方向鍵</b> 移動角色，靠近導覽員 NPC 即可對話探索故事並賺取金幣！
+    </div>
+
+    <!-- Mobile Touch Controls -->
+    <div id="touchJoystick" class="touch-controls">
+        <div id="touchThumb" class="touch-thumb"></div>
+    </div>
+    <div class="action-btns">
+        <div id="interactBtn" class="action-btn">對話</div>
+    </div>
+
+    <!-- Story / NPC Interaction Modal -->
+    <div id="storyModal" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-amber-500/40 w-full max-w-lg rounded-3xl p-6 text-white shadow-2xl relative">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-12 h-12 rounded-2xl bg-amber-600/30 border border-amber-500 flex items-center justify-center text-2xl" id="storyIcon">📜</div>
+                <div>
+                    <h3 id="storyTitle" class="text-lg font-bold text-amber-300">故事主題標題</h3>
+                    <p class="text-xs text-slate-400" id="storySubtitle">故宮南院特約導覽員</p>
+                </div>
+            </div>
+            <p id="storyContent" class="text-sm text-slate-300 leading-relaxed mb-6 bg-slate-800/80 p-4 rounded-2xl border border-slate-700">
+                這裡將呈現精采的故宮典藏文物故事與歷史文化脈絡...
+            </p>
+            <div class="flex justify-between items-center">
+                <span id="rewardBadge" class="text-xs font-semibold bg-emerald-900/80 text-emerald-300 px-3.5 py-2 rounded-xl border border-emerald-600">🎁 探索獎勵：+50 寶物金幣</span>
+                <button onclick="closeStoryModal()" class="bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white px-6 py-2.5 rounded-xl text-sm font-semibold transition shadow-lg">了解並領取金幣</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Member Login / Registration Modal -->
+    <div id="memberModal" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-amber-500/30 w-full max-w-md rounded-3xl p-6 text-white shadow-2xl relative">
+            <button onclick="closeMemberModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl">✕</button>
+            
+            <div id="login-view">
+                <div class="text-center mb-6">
+                    <span class="text-4xl">🏛️</span>
+                    <h3 class="text-xl font-bold text-amber-400 mt-2">加入故宮南院會員</h3>
+                    <p class="text-xs text-slate-400 mt-1">解鎖專屬角色、累積金幣與兌換文創好禮</p>
+                </div>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs text-slate-300 mb-1">會員名稱 / 暱稱</label>
+                        <input type="text" id="memberNameInput" placeholder="例如：故宮小書童" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-300 mb-1">選擇導覽角色外觀</label>
+                        <select id="avatarSelect" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500">
+                            <option value="scholar">🎓 古代才子/學者</option>
+                            <option value="explorer">🧭 現代文物探險家</option>
+                            <option value="princess">👑 皇家宮廷貴族</option>
+                        </select>
+                    </div>
+                    <button onclick="handleLogin()" class="w-full bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white font-semibold py-3 rounded-xl shadow-lg transition">立即登入 / 註冊</button>
+                </div>
+            </div>
+
+            <div id="profile-view" class="hidden text-center py-4">
+                <div class="w-20 h-20 bg-amber-600/30 border-2 border-amber-500 rounded-full mx-auto flex items-center justify-center text-3xl mb-3 shadow-lg" id="profileAvatarIcon">🎓</div>
+                <h3 id="profileName" class="text-xl font-bold text-white">會員名稱</h3>
+                <p id="profileRole" class="text-xs text-amber-400 mb-4">身份：文物探險家</p>
+                <div class="bg-slate-800/80 p-4 rounded-2xl border border-slate-700 flex justify-around items-center mb-6">
+                    <div>
+                        <p class="text-xs text-slate-400">擁有金幣</p>
+                        <p id="profileCoins" class="text-xl font-bold text-amber-300">150 🪙</p>
+                    </div>
+                    <div class="h-8 w-px bg-slate-700"></div>
+                    <div>
+                        <p class="text-xs text-slate-400">探索島嶼</p>
+                        <p id="profileIslands" class="text-xl font-bold text-emerald-400">4 / 4 🏝️</p>
+                    </div>
+                </div>
+                <button onclick="handleLogout()" class="text-sm text-rose-400 hover:text-rose-300 underline">登出帳號</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- E-Commerce Shop Modal -->
+    <div id="shopModal" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-amber-500/40 w-full max-w-2xl rounded-3xl p-6 text-white shadow-2xl relative flex flex-col max-h-[90vh]">
+            <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-800">
+                <div class="flex items-center gap-2">
+                    <span class="text-2xl">🛒</span>
+                    <div>
+                        <h3 class="font-bold text-lg text-amber-300">故宮南院文創紀念品店</h3>
+                        <p class="text-xs text-slate-400">使用冒險獲得的金幣兌換精美文創禮品</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="text-xs bg-amber-900/60 text-amber-300 px-3 py-1.5 rounded-full border border-amber-600" id="shopUserCoins">金幣：150 🪙</span>
+                    <button onclick="closeShopModal()" class="text-slate-400 hover:text-white text-xl">✕</button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 overflow-y-auto pr-1">
+                <!-- Product 1 -->
+                <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-4 flex flex-col justify-between shadow-md">
+                    <div>
+                        <div class="h-32 bg-slate-700/40 rounded-xl mb-3 flex items-center justify-center text-4xl border border-slate-700">🥬</div>
+                        <h4 class="font-bold text-white text-sm">翠玉白菜文創磁鐵</h4>
+                        <p class="text-xs text-slate-400 mt-1">精緻還原人氣國寶翠玉白菜，居家辦公室療癒小物。</p>
+                    </div>
+                    <div class="flex justify-between items-center mt-4 pt-3 border-t border-slate-700/60">
+                        <span class="text-amber-400 font-bold text-sm">100 🪙</span>
+                        <button onclick="buyProduct('翠玉白菜文創磁鐵', 100)" class="bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white text-xs px-4 py-2 rounded-xl font-semibold transition shadow">立即兌換</button>
+                    </div>
+                </div>
+
+                <!-- Product 2 -->
+                <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-4 flex flex-col justify-between shadow-md">
+                    <div>
+                        <div class="h-32 bg-slate-700/40 rounded-xl mb-3 flex items-center justify-center text-4xl border border-slate-700">🥩</div>
+                        <h4 class="font-bold text-white text-sm">肉形石造型滑鼠墊</h4>
+                        <p class="text-xs text-slate-400 mt-1">東坡肉造型極致擬真，辦公桌上最吸睛的美味焦點。</p>
+                    </div>
+                    <div class="flex justify-between items-center mt-4 pt-3 border-t border-slate-700/60">
+                        <span class="text-amber-400 font-bold text-sm">120 🪙</span>
+                        <button onclick="buyProduct('肉形石造型滑鼠墊', 120)" class="bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white text-xs px-4 py-2 rounded-xl font-semibold transition shadow">立即兌換</button>
+                    </div>
+                </div>
+
+                <!-- Product 3 -->
+                <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-4 flex flex-col justify-between shadow-md">
+                    <div>
+                        <div class="h-32 bg-slate-700/40 rounded-xl mb-3 flex items-center justify-center text-4xl border border-slate-700">🍵</div>
+                        <h4 class="font-bold text-white text-sm">阿里山高山茶禮盒（紀念款）</h4>
+                        <p class="text-xs text-slate-400 mt-1">融合亞洲茶文化展覽意象，嚴選南台灣在地優質好茶。</p>
+                    </div>
+                    <div class="flex justify-between items-center mt-4 pt-3 border-t border-slate-700/60">
+                        <span class="text-amber-400 font-bold text-sm">250 🪙</span>
+                        <button onclick="buyProduct('阿里山高山茶禮盒', 250)" class="bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white text-xs px-4 py-2 rounded-xl font-semibold transition shadow">立即兌換</button>
+                    </div>
+                </div>
+
+                <!-- Product 4 -->
+                <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-4 flex flex-col justify-between shadow-md">
+                    <div>
+                        <div class="h-32 bg-slate-700/40 rounded-xl mb-3 flex items-center justify-center text-4xl border border-slate-700">🏮</div>
+                        <h4 class="font-bold text-white text-sm">南院至寶文創帆布袋</h4>
+                        <p class="text-xs text-slate-400 mt-1">簡約大方耐裝耐用，文青日常散步與觀展最佳良伴。</p>
+                    </div>
+                    <div class="flex justify-between items-center mt-4 pt-3 border-t border-slate-700/60">
+                        <span class="text-amber-400 font-bold text-sm">180 🪙</span>
+                        <button onclick="buyProduct('南院至寶文創帆布袋', 180)" class="bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white text-xs px-4 py-2 rounded-xl font-semibold transition shadow">立即兌換</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed top-20 right-4 z-50 bg-slate-900 border border-amber-500 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 translate-x-full transition-transform duration-300">
+        <span id="toastIcon" class="text-xl">✨</span>
+        <div>
+            <h5 id="toastTitle" class="font-bold text-sm text-amber-300">提示</h5>
+            <p id="toastMsg" class="text-xs text-slate-300">操作成功完成</p>
+        </div>
+    </div>
+
+    <!-- Main 3D World Script -->
+    <script>
+        // --- Application State ---
+        let userState = {
+            isLoggedIn: false,
+            name: '',
+            role: 'scholar',
+            coins: 150,
+            unlockedIslands: 4
+        };
+
+        const savedUser = localStorage.getItem('npm_user_v2');
+        if (savedUser) {
+            userState = JSON.parse(savedUser);
+            updateMemberUI();
+        }
+
+        function saveUserState() {
+            localStorage.setItem('npm_user_v2', JSON.stringify(userState));
+            updateMemberUI();
+        }
+
+        function updateMemberUI() {
+            const btnText = document.getElementById('member-btn-text');
+            if (userState.isLoggedIn) {
+                btnText.innerText = userState.name;
+                document.getElementById('profileName').innerText = userState.name;
+                document.getElementById('profileCoins').innerText = userState.coins + ' 🪙';
+                document.getElementById('shopUserCoins').innerText = '金幣：' + userState.coins + ' 🪙';
+                const roleNames = { scholar: '古代才子/學者', explorer: '文物探險家', princess: '皇家貴族' };
+                document.getElementById('profileRole').innerText = '身份：' + (roleNames[userState.role] || '冒險者');
+                const avatarIcons = { scholar: '🎓', explorer: '🧭', princess: '👑' };
+                document.getElementById('profileAvatarIcon').innerText = avatarIcons[userState.role] || '🎓';
+            } else {
+                btnText.innerText = '登入 / 註冊';
+            }
+        }
+
+        // --- Three.js 3D World Setup ---
+        let scene, camera, renderer, player, islands = [], npcs = [], waterMesh, fireflies;
+        let keys = { forward: false, backward: false, left: false, right: false };
+        let touchMove = { x: 0, y: 0 };
+        let activeNpcIndex = null;
+
+        const islandConfigs = [
+            { name: "大廳主島 (Main Hall)", color: 0x1e293b, accentColor: 0xd97706, position: {x: 0, z: 0}, desc: "故宮南院建築主體，由知名建築師設計，結合現代玻璃帷幕與傳統墨韻意象，展現流線造型與水景交融之美。" },
+            { name: "翠玉白菜與肉形石島", color: 0x064e3b, accentColor: 0x10b981, position: {x: 0, z: -70}, desc: "鎮館之寶特區！探索精雕細琢的翠玉白菜（象徵清白與多福）與栩栩如生的清代肉形石傳奇故事。" },
+            { name: "亞洲茶文化島", color: 0x164e63, accentColor: 0x06b6d4, position: {x: 70, z: 0}, desc: "展現亞洲各國豐富多元的茶道藝術、精緻茶具與千年茶文化歷史淵源，感受大自然沉靜氛圍。" },
+            { name: "原住民藝術與工藝島", color: 0x881337, accentColor: 0xf43f5e, position: {x: -70, z: 0}, desc: "呈現台灣原住民族群深厚且充滿生命力的木雕圖騰、織布藝術與神話工藝傳承。" }
+        ];
+
+        function init3D() {
+            const container = document.getElementById('canvas-container');
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x050b14);
+            scene.fog = new THREE.FogExp2(0x050b14, 0.008);
+
+            camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 18, 25);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            container.appendChild(renderer.domElement);
+
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0x94a3b8, 0.8);
+            scene.add(ambientLight);
+
+            const dirLight = new THREE.DirectionalLight(0xffedd5, 1.5);
+            dirLight.position.set(50, 80, 50);
+            dirLight.castShadow = true;
+            dirLight.shadow.mapSize.width = 2048;
+            dirLight.shadow.mapSize.height = 2048;
+            scene.add(dirLight);
+
+            const hemiLight = new THREE.HemisphereLight(0x38bdf8, 0x1e293b, 0.6);
+            scene.add(hemiLight);
+
+            // Create Stylized Water plane
+            const waterGeo = new THREE.PlaneGeometry(500, 500, 32, 32);
+            const waterMat = new THREE.MeshStandardMaterial({
+                color: 0x0369a1,
+                roughness: 0.1,
+                metalness: 0.8,
+                flatShading: true
+            });
+            waterMesh = new THREE.Mesh(waterGeo, waterMat);
+            waterMesh.rotation.x = -Math.PI / 2;
+            waterMesh.position.y = -3;
+            scene.add(waterMesh);
+
+            // Create Fireflies / Magic Sparks
+            const particleCount = 200;
+            const particleGeo = new THREE.BufferGeometry();
+            const particlePositions = new Float32Array(particleCount * 3);
+            for(let i = 0; i < particleCount * 3; i += 3) {
+                particlePositions[i] = (Math.random() - 0.5) * 250;
+                particlePositions[i+1] = Math.random() * 25 + 2;
+                particlePositions[i+2] = (Math.random() - 0.5) * 250;
+            }
+            particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
+            const particleMat = new THREE.PointsMaterial({
+                color: 0xfde047,
+                size: 0.8,
+                transparent: true,
+                opacity: 0.8
+            });
+            fireflies = new THREE.Points(particleGeo, particleMat);
+            scene.add(fireflies);
+
+            // Create Islands & Structures
+            islandConfigs.forEach((cfg, idx) => {
+                const group = new THREE.Group();
+                group.position.set(cfg.position.x, 0, cfg.position.z);
+
+                // Multi-tier Island base
+                const baseGeo = new THREE.CylinderGeometry(28, 25, 5, 32);
+                const baseMat = new THREE.MeshStandardMaterial({ color: cfg.color, roughness: 0.7, metalness: 0.2 });
+                const baseMesh = new THREE.Mesh(baseGeo, baseMat);
+                baseMesh.position.y = -2.5;
+                baseMesh.receiveShadow = true;
+                group.add(baseMesh);
+
+                // Glowing rim on island
+                const ringGeo = new THREE.TorusGeometry(28.2, 0.4, 16, 64);
+                const ringMat = new THREE.MeshBasicMaterial({ color: cfg.accentColor });
+                const ring = new THREE.Mesh(ringGeo, ringMat);
+                ring.rotation.x = Math.PI / 2;
+                ring.position.y = 0;
+                group.add(ring);
+
+                // Island specific architecture / decoration
+                if (idx === 0) {
+                    // Main Museum Hall Building (Curved futuristic/traditional fusion)
+                    const hallGeo = new THREE.BoxGeometry(14, 9, 18);
+                    const hallMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.2, metalness: 0.5 });
+                    const hall = new THREE.Mesh(hallGeo, hallMat);
+                    hall.position.y = 4.5;
+                    hall.castShadow = true;
+                    group.add(hall);
+
+                    // Glass front facade
+                    const glassGeo = new THREE.BoxGeometry(10, 7, 1);
+                    const glassMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.1, transparent: true, opacity: 0.7 });
+                    const glass = new THREE.Mesh(glassGeo, glassMat);
+                    glass.position.set(0, 3.5, 9.1);
+                    group.add(glass);
+
+                    // Golden roof accent
+                    const roofGeo = new THREE.ConeGeometry(11, 4, 4);
+                    const roofMat = new THREE.MeshStandardMaterial({ color: 0xd97706, metalness: 0.6, roughness: 0.3 });
+                    const roof = new THREE.Mesh(roofGeo, roofMat);
+                    roof.position.y = 11;
+                    roof.rotation.y = Math.PI / 4;
+                    group.add(roof);
+                } else if (idx === 1) {
+                    // Cabbage sculpture pillar
+                    const pillarGeo = new THREE.CylinderGeometry(2.5, 2.5, 9, 16);
+                    const pillarMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.3 });
+                    const pillar = new THREE.Mesh(pillarGeo, pillarMat);
+                    pillar.position.y = 4.5;
+                    group.add(pillar);
+
+                    const cabGeo = new THREE.SphereGeometry(3, 16, 16);
+                    const cabMat = new THREE.MeshStandardMaterial({ color: 0x10b981, roughness: 0.3, emissive: 0x064e3b });
+                    const cabbage = new THREE.Mesh(cabGeo, cabMat);
+                    cabbage.position.y = 9.5;
+                    group.add(cabbage);
+                } else if (idx === 2) {
+                    // Tea Pavilion & Giant Teacup
+                    const pavGeo = new THREE.CylinderGeometry(7, 7, 1.2, 16);
+                    const pavMat = new THREE.MeshStandardMaterial({ color: 0x0e7490 });
+                    const pav = new THREE.Mesh(pavGeo, pavMat);
+                    pav.position.y = 0.6;
+                    group.add(pav);
+
+                    const cupGeo = new THREE.CylinderGeometry(2.5, 2, 4, 16);
+                    const cupMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.2 });
+                    const cup = new THREE.Mesh(cupGeo, cupMat);
+                    cup.position.y = 3;
+                    group.add(cup);
+                } else if (idx === 3) {
+                    // Totem totem poles with vibrant art
+                    for (let t = 0; t < 3; t++) {
+                        const totemGeo = new THREE.BoxGeometry(3.2 - t*0.5, 3.5, 3.2 - t*0.5);
+                        const totemMat = new THREE.MeshStandardMaterial({ color: t % 2 === 0 ? 0xe11d48 : 0xf59e0b, roughness: 0.4 });
+                        const totem = new THREE.Mesh(totemGeo, totemMat);
+                        totem.position.y = 1.75 + t * 3.5;
+                        group.add(totem);
+                    }
+                }
+
+                // Add NPC guide in each island with glowing aura
+                const npcGroup = new THREE.Group();
+                const npcBodyGeo = new THREE.CylinderGeometry(0.9, 0.9, 2.6, 16);
+                const npcMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.3, metalness: 0.4 });
+                const npcBody = new THREE.Mesh(npcBodyGeo, npcMat);
+                npcBody.position.y = 1.3;
+                npcBody.castShadow = true;
+                npcGroup.add(npcBody);
+
+                const npcHeadGeo = new THREE.SphereGeometry(0.8, 16, 16);
+                const npcHead = new THREE.Mesh(npcHeadGeo, new THREE.MeshStandardMaterial({ color: 0xfde047 }));
+                npcHead.position.y = 3;
+                npcGroup.add(npcHead);
+
+                // NPC Floating glowing halo
+                const haloGeo = new THREE.RingGeometry(1, 1.3, 32);
+                const haloMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, side: THREE.DoubleSide });
+                const halo = new THREE.Mesh(haloGeo, haloMat);
+                halo.rotation.x = Math.PI / 2;
+                halo.position.y = 4.2;
+                npcGroup.add(halo);
+
+                npcGroup.position.set(cfg.position.x + 10, 0, cfg.position.z + 10);
+                scene.add(npcGroup);
+
+                npcs.push({
+                    islandIndex: idx,
+                    position: new THREE.Vector3(cfg.position.x + 10, 0, cfg.position.z + 10),
+                    config: cfg,
+                    haloMesh: halo
+                });
+
+                scene.add(group);
+                islands.push(group);
+            });
+
+            // Create Player Avatar (Detailed 3D avatar)
+            const playerGroup = new THREE.Group();
+            const bodyGeo = new THREE.CylinderGeometry(0.85, 0.85, 2.4, 16);
+            const bodyMat = new THREE.MeshStandardMaterial({ color: 0x3b82f6, roughness: 0.3, metalness: 0.2 });
+            const playerBody = new THREE.Mesh(bodyGeo, bodyMat);
+            playerBody.position.y = 1.5;
+            playerBody.castShadow = true;
+            playerGroup.add(playerBody);
+
+            // Head
+            const headGeo = new THREE.SphereGeometry(0.75, 16, 16);
+            const headMat = new THREE.MeshStandardMaterial({ color: 0xfde047 });
+            const head = new THREE.Mesh(headGeo, headMat);
+            head.position.y = 3.1;
+            playerGroup.add(head);
+
+            // Scholar cap / hat accent
+            const capGeo = new THREE.BoxGeometry(1.4, 0.3, 1.4);
+            const capMat = new THREE.MeshStandardMaterial({ color: 0x1e293b });
+            const cap = new THREE.Mesh(capGeo, capMat);
+            cap.position.y = 3.7;
+            playerGroup.add(cap);
+
+            scene.add(playerGroup);
+            player = playerGroup;
+
+            // Event Listeners
+            window.addEventListener('resize', onWindowResize);
+            setupInputListeners();
+        }
+
+        // --- Controls & Movement ---
+        function setupInputListeners() {
+            window.addEventListener('keydown', (e) => {
+                if (e.key === 'w' || e.key === 'ArrowUp') keys.forward = true;
+                if (e.key === 's' || e.key === 'ArrowDown') keys.backward = true;
+                if (e.key === 'a' || e.key === 'ArrowLeft') keys.left = true;
+                if (e.key === 'd' || e.key === 'ArrowRight') keys.right = true;
+            });
+            window.addEventListener('keyup', (e) => {
+                if (e.key === 'w' || e.key === 'ArrowUp') keys.forward = false;
+                if (e.key === 's' || e.key === 'ArrowDown') keys.backward = false;
+                if (e.key === 'a' || e.key === 'ArrowLeft') keys.left = false;
+                if (e.key === 'd' || e.key === 'ArrowRight') keys.right = false;
+            });
+
+            // Touch Joystick logic
+            const joystick = document.getElementById('touchJoystick');
+            const thumb = document.getElementById('touchThumb');
+            let joystickActive = false;
+            let center = { x: 0, y: 0 };
+
+            joystick.addEventListener('touchstart', (e) => {
+                joystickActive = true;
+                const rect = joystick.getBoundingClientRect();
+                center = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+            });
+
+            window.addEventListener('touchmove', (e) => {
+                if (!joystickActive) return;
+                const touch = e.touches[0];
+                const dx = touch.clientX - center.x;
+                const dy = touch.clientY - center.y;
+                const dist = Math.min(50, Math.sqrt(dx*dx + dy*dy));
+                const angle = Math.atan2(dy, dx);
+
+                const tx = Math.cos(angle) * dist;
+                const ty = Math.sin(angle) * dist;
+                thumb.style.transform = `translate(${tx}px, ${ty}px)`;
+
+                touchMove.x = tx / 50;
+                touchMove.y = ty / 50;
+            });
+
+            window.addEventListener('touchend', () => {
+                if (!joystickActive) return;
+                joystickActive = false;
+                thumb.style.transform = `translate(0px, 0px)`;
+                touchMove.x = 0;
+                touchMove.y = 0;
+            });
+
+            document.getElementById('interactBtn').addEventListener('click', checkNpcProximity);
+        }
+
+        function teleportToIsland(index) {
+            const cfg = islandConfigs[index];
+            player.position.set(cfg.position.x, 0, cfg.position.z + 6);
+            showToast('🗺️ 傳送成功', `已瞬間移動至：${cfg.name}`);
+            document.getElementById('current-island-status').innerText = `目前位置：${cfg.name}`;
+        }
+
+        function checkNpcProximity() {
+            let closestNpc = null;
+            let minDist = 9; // interaction radius
+
+            npcs.forEach(npc => {
+                const dist = player.position.distanceTo(npc.position);
+                if (dist < minDist) {
+                    minDist = dist;
+                    closestNpc = npc;
+                }
+            });
+
+            if (closestNpc) {
+                activeNpcIndex = closestNpc.islandIndex;
+                openStoryModal(closestNpc.config);
+            } else {
+                showToast('💬 提示', '請再靠近島上的導覽員 NPC 一點來進行對話！');
+            }
+        }
+
+        function openStoryModal(cfg) {
+            document.getElementById('storyTitle').innerText = cfg.name;
+            document.getElementById('storySubtitle').innerText = '國寶導覽與歷史解說員';
+            document.getElementById('storyContent').innerText = cfg.desc;
+            document.getElementById('storyModal').classList.remove('hidden');
+        }
+
+        function closeStoryModal() {
+            document.getElementById('storyModal').classList.add('hidden');
+            if (activeNpcIndex !== null) {
+                userState.coins += 50;
+                saveUserState();
+                showToast('🎁 獲得獎勵', '成功探索島嶼故事，獲得 +50 金幣！');
+                activeNpcIndex = null;
+            }
+        }
+
+        // --- E-commerce Shop Functions ---
+        function openShopModal() {
+            if (!userState.isLoggedIn) {
+                showToast('🔒 權限提示', '請先登入會員才能使用文創商店兌換功能喔！');
+                openMemberModal();
+                return;
+            }
+            document.getElementById('shopModal').classList.remove('hidden');
+        }
+
+        function closeShopModal() {
+            document.getElementById('shopModal').classList.add('hidden');
+        }
+
+        function buyProduct(productName, price) {
+            if (userState.coins < price) {
+                showToast('❌ 兌換失敗', '您的金幣不足！多去探索各個故事島與 NPC 對話即可賺取金幣。');
+                return;
+            }
+            userState.coins -= price;
+            saveUserState();
+            document.getElementById('shopUserCoins').innerText = '金幣：' + userState.coins + ' 🪙';
+            showToast('🎉 兌換成功', `您已成功兌換「${productName}」！`);
+        }
+
+        // --- Member Modal Functions ---
+        function openMemberModal() {
+            document.getElementById('memberModal').classList.remove('hidden');
+            if (userState.isLoggedIn) {
+                document.getElementById('login-view').classList.add('hidden');
+                document.getElementById('profile-view').classList.remove('hidden');
+            } else {
+                document.getElementById('login-view').classList.remove('hidden');
+                document.getElementById('profile-view').classList.add('hidden');
+            }
+        }
+
+        function closeMemberModal() {
+            document.getElementById('memberModal').classList.add('hidden');
+        }
+
+        function handleLogin() {
+            const nameInput = document.getElementById('memberNameInput').value.trim();
+            const roleSelect = document.getElementById('avatarSelect').value;
+            if (!nameInput) {
+                showToast('⚠️ 欄位空白', '請輸入您的會員名稱！');
+                return;
+            }
+            userState.isLoggedIn = true;
+            userState.name = nameInput;
+            userState.role = roleSelect;
+            saveUserState();
+            openMemberModal();
+            showToast('👋 歡迎加入', `恭喜 ${nameInput} 成為故宮南院精緻會員！`);
+        }
+
+        function handleLogout() {
+            userState.isLoggedIn = false;
+            userState.name = '';
+            localStorage.removeItem('npm_user_v2');
+            updateMemberUI();
+            openMemberModal();
+            showToast('🔒 已登出', '您已安全登出會員帳號。');
+        }
+
+        function showToast(title, msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastTitle').innerText = title;
+            document.getElementById('toastMsg').innerText = msg;
+            toast.classList.remove('translate-x-full');
+            setTimeout(() => {
+                toast.classList.add('translate-x-full');
+            }, 3500);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // --- Animation Loop ---
+        const speed = 0.18;
+        let clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const elapsedTime = clock.getElapsedTime();
+
+            // Movement logic
+            let moveX = 0;
+            let moveZ = 0;
+
+            if (keys.forward || touchMove.y < -0.2) moveZ -= speed;
+            if (keys.backward || touchMove.y > 0.2) moveZ += speed;
+            if (keys.left || touchMove.x < -0.2) moveX -= speed;
+            if (keys.right || touchMove.x > 0.2) moveX += speed;
+
+            if (moveX !== 0 || moveZ !== 0) {
+                player.position.x += moveX;
+                player.position.z += moveZ;
+                player.rotation.y = Math.atan2(moveX, moveZ);
+            }
+
+            // Smooth camera follow
+            camera.position.x = THREE.MathUtils.lerp(camera.position.x, player.position.x, 0.1);
+            camera.position.z = THREE.MathUtils.lerp(camera.position.z, player.position.z + 18, 0.1);
+            camera.position.y = THREE.MathUtils.lerp(camera.position.y, player.position.y + 14, 0.1);
+            camera.lookAt(player.position.x, player.position.y + 2, player.position.z);
+
+            // Animate NPC halos
+            npcs.forEach(npc => {
+                if(npc.haloMesh) {
+                    npc.haloMesh.rotation.z = elapsedTime * 2;
+                }
+            });
+
+            // Detect current island based on player position
+            let currentIslandIdx = 0;
+            let minD = 999;
+            islandConfigs.forEach((cfg, idx) => {
+                const centerPos = new THREE.Vector3(cfg.position.x, 0, cfg.position.z);
+                const d = player.position.distanceTo(centerPos);
+                if (d < minD) {
+                    minD = d;
+                    currentIslandIdx = idx;
+                }
+            });
+            document.getElementById('current-island-status').innerText = `目前位置：${islandConfigs[currentIslandIdx].name}`;
+
+            renderer.render(scene, camera);
+        }
+
+        window.onload = function() {
+            init3D();
+            animate();
+        };
+    </script>
+</body>
+</html>
+```
+eof
+
+---
+
+### ✨ 本次升級亮點說明
+1. **沉浸式奇幻夜景與光影質感**：將背景色調改為深邃星空藍夜景，並加入了發光光暈粒子（Fireflies）與精緻的水面金屬反光效果。
+2. **島嶼與建築物精緻化**：主展館加入了通透的藍色玻璃帷幕與金色屋頂飛簷；各島嶼邊緣皆環繞著高質感霓虹光環。
+3. **優化移動手感與互動 UI**：提升了虛擬搖桿與互動按鈕的視覺質感，對話與商店視窗皆套用了流暢的毛玻璃（Glassmorphism）特效。
